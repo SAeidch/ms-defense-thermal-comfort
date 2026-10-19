@@ -682,6 +682,38 @@ ul.iconlist li div b { color: var(--ink); font-family: var(--font); font-weight:
 .tl-node b { font-size: 13.5px; line-height: 1.15; }
 .tl-node span { font-size: 13px; }
 
+/* --- math slides (native MathML) --- */
+math { font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", math; color: var(--ink); }
+math[display="block"] { font-size: 25px; margin: 6px 0 2px; overflow-x: auto; overflow-y: hidden; }
+.mnote math, .mcard p math, table.mt math { font-size: 20px; }
+.mcol { display: flex; flex-direction: column; gap: 14px; }
+.mcard { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px 18px 12px; box-shadow: var(--shadow); }
+.mcard.hl { border: 2px solid var(--trainable); background: color-mix(in srgb, var(--trainable-soft) 60%, var(--card)); }
+.mcard.eqs { display: flex; flex-direction: column; gap: 2px; }
+.mh { display: flex; align-items: center; gap: 9px; font: 700 14px var(--font); letter-spacing: .1em; text-transform: uppercase; color: var(--accent-ink); }
+.mh svg.ic { width: 22px; height: 22px; }
+.mstep { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; letter-spacing: 0; }
+:root[data-theme="dark"] .mstep { color: #17112a; }
+.mnote { font: 18.5px/1.4 var(--serif); color: var(--ink-2); margin-top: 4px; }
+.eqr { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px dashed var(--grid); }
+.eqr:last-of-type { border-bottom: 0; }
+.eqr math[display="block"] { margin: 6px 0; flex: 1; text-align: left; }
+.eqn { font: 600 16px var(--serif); color: var(--muted); flex: none; }
+table.t.mt { margin-top: 6px; } table.t.mt td, table.t.mt th { padding: 8px 10px; font-size: 19px; }
+
+/* --- title Transformer diagram --- */
+#hero-tf { padding: 24px 20px 10px; }
+.slide.active .tf-pulse { animation: tfUp 3.2s cubic-bezier(.4,0,.6,1) infinite; }
+@keyframes tfUp { 0% { transform: translateY(0); opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { transform: translateY(-560px); opacity: 0; } }
+.slide.active .tf-head { animation: tfHead 1.5s ease-in-out infinite alternate; animation-delay: var(--dl, 0s); }
+@keyframes tfHead { from { opacity: .3; } to { opacity: 1; } }
+.slide.active .tf-arc { animation: fadeIn .6s ease both; }
+.mcol, .mcard, .eqr { min-width: 0; }
+.slide .cols.c2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.mcard.eqs math[display="block"], .mcol math[display="block"] { font-size: 23px; }
+.mcard.lstm math[display="block"] { font-size: 21px; }
+table.t.mt th { font-size: 13px; }
+
 </style>
 </head>
 <body>
@@ -747,9 +779,9 @@ ul.iconlist li div b { color: var(--ink); font-family: var(--font); font-weight:
     </div>
   </div>
   <div class="title-right">
-    <canvas id="hero-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+    <div id="hero-tf" style="position:absolute;inset:0"></div>
   </div>
-  <aside class="notes">Good morning. Thank you all for being here. My name is Saeid Chahardoli, and today I am defending my non-thesis M.S. in Computer Science. The question behind this work: can we predict how warm or cool an occupant feels, as three thermal sensation classes, from only a few practical signals, air temperature, humidity and a smartwatch heart rate, without collecting a large labeled dataset in every building? The animation shows the idea: three everyday signals flow into one model that outputs comfort probabilities. The values in it are illustrative.</aside>
+  <aside class="notes">Good morning. Thank you all for being here. My name is Saeid Chahardoli, and today I am defending my non-thesis M.S. in Computer Science. The question behind this work: can we predict how warm or cool an occupant feels, as three thermal sensation classes, from only a few practical signals, air temperature, humidity and a smartwatch heart rate, without collecting a large labeled dataset in every building? The diagram on the right is the model at the center of this work: a Transformer encoder that reads one hour of sensor data, twelve five-minute steps, through a small adapter, attends across the steps, and outputs probabilities for cool, neutral and warm. The values in it are illustrative.</aside>
 </section>
 
 <!-- =====================================================================
@@ -1116,6 +1148,36 @@ ul.iconlist li div b { color: var(--ink); font-family: var(--font); font-weight:
   <aside class="notes">Before transfer learning, we trained models from scratch on this same field data, presented at Indoor Air 2024. The RNN-LSTM beat a feed-forward ANN, but accuracy on the seven-point vote was only above 50 percent. These are seven-point numbers, not directly comparable to the three-class results later. The problem is structural: few labels, few inputs, a rare warm class and noisy votes. That motivated borrowing knowledge from the large ASHRAE database.</aside>
 </section>
 
+<!--MATH:FORMULATION-->
+<section class="slide" data-section="Methods" data-title="Problem formulation">
+  <h2 class="title">Problem formulation: transfer from ASHRAE to one building</h2>
+  <div class="cols c2" style="gap:24px">
+    <div class="mcol">
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-db"/></svg>Source domain · ASHRAE DB II</div>
+        <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>&#x1D49F;</mi><mi>S</mi></msub><mo>&#x0003D;</mo><mo stretchy="false">&#x0007B;</mo><mo stretchy="false">&#x00028;</mo><msubsup><mi>X</mi><mi>i</mi><mrow><mi>S</mi></mrow></msubsup><mo>&#x0002C;</mo><mspace width="0.167em" /><msub><mi>y</mi><mi>i</mi></msub><mo stretchy="false">&#x00029;</mo><msubsup><mo stretchy="false">&#x0007D;</mo><mrow><mi>i</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><msub><mi>N</mi><mi>S</mi></msub></mrow></msubsup><mo>&#x0002C;</mo><mspace width="1em" /><msup><mi>X</mi><mrow><mi>S</mi></mrow></msup><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>12</mn><mi>&#x000D7;</mi><mn>17</mn></mrow></msup><mo>&#x0002C;</mo><mspace width="1em" /><msub><mi>N</mi><mi>S</mi></msub><mo>&#x0003D;</mo><mtext>44,124</mtext></mrow></math></div>
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-building"/></svg>Target domain · field data</div>
+        <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>&#x1D49F;</mi><mi>T</mi></msub><mo>&#x0003D;</mo><mo stretchy="false">&#x0007B;</mo><mo stretchy="false">&#x00028;</mo><msubsup><mi>X</mi><mi>j</mi><mrow><mi>T</mi></mrow></msubsup><mo>&#x0002C;</mo><mspace width="0.167em" /><msub><mi>y</mi><mi>j</mi></msub><mo stretchy="false">&#x00029;</mo><msubsup><mo stretchy="false">&#x0007D;</mo><mrow><mi>j</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><msub><mi>N</mi><mi>T</mi></msub></mrow></msubsup><mo>&#x0002C;</mo><mspace width="1em" /><msup><mi>X</mi><mrow><mi>T</mi></mrow></msup><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>12</mn><mi>&#x000D7;</mi><mn>6</mn></mrow></msup><mo>&#x0002C;</mo><mspace width="1em" /><msub><mi>N</mi><mi>T</mi></msub><mo>&#x0003D;</mo><mn>596</mn></mrow></math>
+        <div class="mnote">Labels <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>y</mi><mo>&#x02208;</mo><mo stretchy="false">&#x0007B;</mo><mtext>Cool</mtext><mo>&#x0002C;</mo><mtext>&#x000A0;</mtext><mtext>Neutral</mtext><mo>&#x0002C;</mo><mtext>&#x000A0;</mtext><mtext>Warm</mtext><mo stretchy="false">&#x0007D;</mo></mrow></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>K</mi><mo>&#x0003D;</mo><mn>3</mn></mrow></math>; each row of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>X</mi></mrow></math> is one 5-minute step.</div></div>
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-net"/></svg>Model (row-vector convention)</div>
+        <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>f</mi><mrow><mi>&#x003B8;</mi></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>X</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo>softmax</mo><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mi>&#x003C0;</mi><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msub><mi>E</mi><mrow><mi>&#x003D5;</mi></mrow></msub><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mi>h</mi><mo stretchy="false">&#x00028;</mo><mi>X</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002B;</mo><mi>P</mi><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><msub><mi>W</mi><mi>c</mi></msub><mo>&#x0002B;</mo><msub><mi>b</mi><mi>c</mi></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow></mrow></math>
+        <div class="mnote"><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>h</mi></mrow></math>: input map, the 17→256 projection or the adapter <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>a</mi><mrow><mi>&#x003C9;</mi></mrow></msub></mrow></math> (6→128→256) · <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>P</mi></mrow></math>: positional embedding · <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>E</mi><mrow><mi>&#x003D5;</mi></mrow></msub><mo>&#x0003D;</mo><msub><mi>E</mi><mrow><msub><mi>&#x003D5;</mi><mn>6</mn></msub></mrow></msub><mo>&#x02218;</mo><mo>&#x022EF;</mo><mo>&#x02218;</mo><msub><mi>E</mi><mrow><msub><mi>&#x003D5;</mi><mn>1</mn></msub></mrow></msub></mrow></math>: encoder layers · <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003C0;</mi></mrow></math>: last-token pooling (LayerNorm and dropout omitted)</div></div>
+    </div>
+    <div class="mcol">
+      <div class="mcard"><div class="mh"><span class="mstep">1</span>Pretraining on the source</div>
+        <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>&#x003B8;</mi><mrow><mo>&#x0002A;</mo></mrow></msup><mo>&#x0003D;</mo><munder><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">g</mi><mspace width="0.167em" /><mi mathvariant="normal">m</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi></mrow></mrow><mrow><mi>&#x003B8;</mi></mrow></munder><mspace width="0.278em" /><msub><mi>&#x02112;</mi><mrow><mi>w</mi></mrow></msub><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mi>&#x003B8;</mi><mi>;</mi><mspace width="0.167em" /><msub><mi>&#x1D49F;</mi><mi>S</mi></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow></mrow></math></div>
+      <div class="mcard hl"><div class="mh"><span class="mstep">2</span>Adaptation on the target</div>
+        <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><munder><mrow><mo>min</mo></mrow><mrow><mi>&#x003C9;</mi><mo>&#x0002C;</mo><mspace width="0.278em" /><msub><mi>&#x003D5;</mi><mn>6</mn></msub><mo>&#x0002C;</mo><mspace width="0.278em" /><msub><mi>W</mi><mi>c</mi></msub><mo>&#x0002C;</mo><mspace width="0.278em" /><msub><mi>b</mi><mi>c</mi></msub></mrow></munder><mspace width="0.278em" /><msub><mi>&#x02112;</mi><mrow><mi>w</mi></mrow></msub><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mi>&#x003C9;</mi><mo>&#x0002C;</mo><msub><mi>&#x003D5;</mi><mn>6</mn></msub><mo>&#x0002C;</mo><msub><mi>W</mi><mi>c</mi></msub><mo>&#x0002C;</mo><msub><mi>b</mi><mi>c</mi></msub><mi>;</mi><mspace width="0.167em" /><msub><mi>&#x1D49F;</mi><mi>T</mi></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow></mrow></math>
+        <div class="mnote">with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>P</mi><mo>&#x0002C;</mo><mtext>&#x000A0;</mtext><msub><mi>&#x003D5;</mi><mn>1</mn></msub><mo>&#x0002C;</mo><mo>&#x02026;</mo><mo>&#x0002C;</mo><msub><mi>&#x003D5;</mi><mn>5</mn></msub></mrow></math> fixed at their pretrained values <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msup><mi>&#x003B8;</mi><mrow><mo>&#x0002A;</mo></mrow></msup></mrow></math></div>
+        <div class="mnote">Trainable: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo stretchy="false">&#x0007C;</mo><mi>&#x003C9;</mi><mo stretchy="false">&#x0007C;</mo><mo>&#x0002B;</mo><mo stretchy="false">&#x0007C;</mo><msub><mi>&#x003D5;</mi><mn>6</mn></msub><mo stretchy="false">&#x0007C;</mo><mo>&#x0002B;</mo><mo stretchy="false">&#x0007C;</mo><msub><mi>W</mi><mi>c</mi></msub><mo>&#x0002C;</mo><msub><mi>b</mi><mi>c</mi></msub><mo stretchy="false">&#x0007C;</mo><mo>&#x0003D;</mo><mtext>33,920</mtext><mo>&#x0002B;</mo><mtext>527,104</mtext><mo>&#x0002B;</mo><mn>771</mn><mo>&#x0003D;</mo><mtext>561,795</mtext></mrow></math>, about 17.6% of 3,200,899 parameters</div></div>
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-plug"/></svg>BiLSTM variant</div>
+        <div class="mnote" style="margin-top:2px">The adapter maps 6 → 512 into BiLSTM layer 2; layer 2 and the classifier are retrained; layer 1 is bypassed.</div></div>
+    </div>
+  </div>
+  <div class="src">Parameter counts estimated from the layer sizes in the manuscript. <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x02112;</mi><mrow><mi>w</mi></mrow></msub></mrow></math>: class-weighted cross-entropy (defined on the optimization slide).</div>
+  <aside class="notes">Let me state the problem formally. The source domain is ASHRAE DB II: 44,124 labeled sequences, each a 12-by-17 matrix. The target domain is our field data: 596 labeled sequences, each 12 by 6, with the same three classes. The model is a composition: an input map h, the positional embedding P, six encoder layers E-phi, last-token pooling pi, and a linear classifier. Training has two stages. First, pretraining finds theta-star on the source. Then, for adaptation, the input map is replaced by the adapter a-omega, and we minimize the same weighted loss on the target over only the adapter, the sixth encoder layer and the classifier, keeping the positional embedding and layers one to five fixed. That is about 562 thousand of 3.2 million parameters, roughly 18 percent. For the BiLSTM, the adapter maps into layer two, which is retrained with the classifier.</aside>
+</section>
+
+
 <!-- =====================================================================
      16. FEATURE SPACES
      ===================================================================== -->
@@ -1264,6 +1326,40 @@ ul.iconlist li div b { color: var(--ink); font-family: var(--font); font-weight:
   <aside class="notes">This is the T3C architecture. A linear layer projects the 17 features at each step into 256 dimensions; a learned positional embedding adds order. Then six encoder layers, each with eight-head self-attention and a feed-forward network that expands to 512, with residual connections and layer normalization. The small heat map shows what attention computes: for each of the 12 steps, a weight over all 12 steps; the values are illustrative. We pool the last token, the actual survey moment, which through attention already summarizes the earlier steps. A linear layer gives three class probabilities. About 3.2 million parameters, estimated from the layer sizes.</aside>
 </section>
 
+<!--MATH:TRANSFORMER-->
+<section class="slide" data-section="Methods" data-title="The Transformer, formally">
+  <h2 class="title">The Transformer encoder, formally</h2>
+  <div class="cols" style="grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:22px">
+    <div class="mcard eqs">
+      <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>Z</mi><mrow><mo stretchy="false">&#x00028;</mo><mn>0</mn><mo stretchy="false">&#x00029;</mo></mrow></msup><mo>&#x0003D;</mo><mrow><mi mathvariant="normal">L</mi><mi mathvariant="normal">N</mi></mrow><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mi>X</mi><msub><mi>W</mi><mi>e</mi></msub><mo>&#x0002B;</mo><msub><mi>b</mi><mi>e</mi></msub><mo>&#x0002B;</mo><mi>P</mi><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mo>&#x0002C;</mo><mspace width="1em" /><msub><mi>W</mi><mi>e</mi></msub><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>17</mn><mi>&#x000D7;</mi><mn>256</mn></mrow></msup><mo>&#x0002C;</mo><mtext>&#x000A0;</mtext><mi>P</mi><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>12</mn><mi>&#x000D7;</mi><mn>256</mn></mrow></msup></mrow></math><span class="eqn">(1)</span></div>
+      <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>Q</mi><mi>h</mi></msub><mo>&#x0003D;</mo><mi>Z</mi><msubsup><mi>W</mi><mi>h</mi><mrow><mi>Q</mi></mrow></msubsup><mo>&#x0002C;</mo><mspace width="1em" /><msub><mi>K</mi><mi>h</mi></msub><mo>&#x0003D;</mo><mi>Z</mi><msubsup><mi>W</mi><mi>h</mi><mrow><mi>K</mi></mrow></msubsup><mo>&#x0002C;</mo><mspace width="1em" /><msub><mi>V</mi><mi>h</mi></msub><mo>&#x0003D;</mo><mi>Z</mi><msubsup><mi>W</mi><mi>h</mi><mrow><mi>V</mi></mrow></msubsup><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>12</mn><mi>&#x000D7;</mi><mn>32</mn></mrow></msup><mo>&#x0002C;</mo><mspace width="1em" /><mi>h</mi><mo>&#x0003D;</mo><mn>1</mn><mo>&#x0002C;</mo><mo>&#x02026;</mo><mo>&#x0002C;</mo><mn>8</mn></mrow></math><span class="eqn">(2)</span></div>
+      <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>A</mi><mi>h</mi></msub><mo>&#x0003D;</mo><mo>softmax</mo><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mfrac><mrow><msub><mi>Q</mi><mi>h</mi></msub><msubsup><mi>K</mi><mi>h</mi><mrow><mo>&#x022A4;</mo></mrow></msubsup></mrow><mrow><msqrt><mrow><mn>32</mn></mrow></msqrt></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>12</mn><mi>&#x000D7;</mi><mn>12</mn></mrow></msup></mrow></math><span class="eqn">(3)</span></div>
+      <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mrow><mi mathvariant="normal">M</mi><mi mathvariant="normal">H</mi><mi mathvariant="normal">S</mi><mi mathvariant="normal">A</mi></mrow><mo stretchy="false">&#x00028;</mo><mi>Z</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><msub><mi>A</mi><mn>1</mn></msub><msub><mi>V</mi><mn>1</mn></msub><mspace width="0.278em" /><mo fence="false" stretchy="false">&#x02016;</mo><mspace width="0.278em" /><msub><mi>A</mi><mn>2</mn></msub><msub><mi>V</mi><mn>2</mn></msub><mspace width="0.278em" /><mo fence="false" stretchy="false">&#x02016;</mo><mspace width="0.278em" /><mo>&#x022EF;</mo><mspace width="0.278em" /><mo fence="false" stretchy="false">&#x02016;</mo><mspace width="0.278em" /><msub><mi>A</mi><mn>8</mn></msub><msub><mi>V</mi><mn>8</mn></msub><mo stretchy="true" fence="true" form="postfix">]</mo></mrow><msup><mi>W</mi><mrow><mi>O</mi></mrow></msup></mrow></math><span class="eqn">(4)</span></div>
+      <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover><mrow><mi>Z</mi></mrow><mo stretchy="false">&#x0007E;</mo></mover><mo>&#x0003D;</mo><mrow><mi mathvariant="normal">L</mi><mi mathvariant="normal">N</mi></mrow><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mi>Z</mi><mo>&#x0002B;</mo><mrow><mi mathvariant="normal">D</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">p</mi></mrow><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mrow><mi mathvariant="normal">M</mi><mi mathvariant="normal">H</mi><mi mathvariant="normal">S</mi><mi mathvariant="normal">A</mi></mrow><mo stretchy="false">&#x00028;</mo><mi>Z</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow></mrow></math><span class="eqn">(5)</span></div>
+      <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>Z</mi><mrow><mo stretchy="false">&#x00028;</mo><mi>&#x02113;</mi><mo stretchy="false">&#x00029;</mo></mrow></msup><mo>&#x0003D;</mo><mrow><mi mathvariant="normal">L</mi><mi mathvariant="normal">N</mi></mrow><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mover><mrow><mi>Z</mi></mrow><mo stretchy="false">&#x0007E;</mo></mover><mo>&#x0002B;</mo><mrow><mi mathvariant="normal">D</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">p</mi></mrow><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mo>max</mo><mo stretchy="false">&#x00028;</mo><mn>0</mn><mo>&#x0002C;</mo><mover><mrow><mi>Z</mi></mrow><mo stretchy="false">&#x0007E;</mo></mover><msub><mi>W</mi><mn>1</mn></msub><mo>&#x0002B;</mo><msub><mi>b</mi><mn>1</mn></msub><mo stretchy="false">&#x00029;</mo><msub><mi>W</mi><mn>2</mn></msub><mo>&#x0002B;</mo><msub><mi>b</mi><mn>2</mn></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow></mrow></math><span class="eqn">(6)</span></div>
+      <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover><mrow><mi>y</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mo>&#x0003D;</mo><mo>softmax</mo><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mrow><mi mathvariant="normal">D</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">p</mi></mrow><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msubsup><mi>z</mi><mrow><mn>12</mn></mrow><mrow><mo stretchy="false">&#x00028;</mo><mn>6</mn><mo stretchy="false">&#x00029;</mo></mrow></msubsup><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><msub><mi>W</mi><mi>c</mi></msub><mo>&#x0002B;</mo><msub><mi>b</mi><mi>c</mi></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mo>&#x0002C;</mo><mspace width="1em" /><msubsup><mi>z</mi><mrow><mn>12</mn></mrow><mrow><mo stretchy="false">&#x00028;</mo><mn>6</mn><mo stretchy="false">&#x00029;</mo></mrow></msubsup><mo>&#x0003D;</mo><msubsup><mi>Z</mi><mrow><mn>12</mn><mo>&#x0002C;</mo><mi>:</mi></mrow><mrow><mo stretchy="false">&#x00028;</mo><mn>6</mn><mo stretchy="false">&#x00029;</mo></mrow></msubsup><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>256</mn></mrow></msup></mrow></math><span class="eqn">(7)</span></div>
+      <div class="mnote">LayerNorm <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mrow><mi mathvariant="normal">L</mi><mi mathvariant="normal">N</mi></mrow><mo stretchy="false">&#x00028;</mo><mi>z</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mi>&#x003B3;</mi><mo>&#x02299;</mo><mfrac><mrow><mi>z</mi><mo>&#x02212;</mo><mi>&#x003BC;</mi></mrow><mrow><msqrt><mrow><msup><mi>&#x003C3;</mi><mrow><mn>2</mn></mrow></msup><mo>&#x0002B;</mo><mi>&#x003F5;</mi></mrow></msqrt></mrow></mfrac><mo>&#x0002B;</mo><mi>&#x003B2;</mi></mrow></math> · <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>W</mi><mn>1</mn></msub><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>256</mn><mi>&#x000D7;</mi><mn>512</mn></mrow></msup><mo>&#x0002C;</mo><mtext>&#x000A0;</mtext><msub><mi>W</mi><mn>2</mn></msub><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>512</mn><mi>&#x000D7;</mi><mn>256</mn></mrow></msup></mrow></math> · post-norm, as in the manuscript · projection biases in (2) omitted</div>
+    </div>
+    <div class="mcol">
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-scale"/></svg>Cost and path length per layer</div>
+        <table class="t mt">
+          <thead><tr><th>Layer</th><th>Ops / layer</th><th>Sequential</th><th>Path t₁→t₁₂</th></tr></thead>
+          <tbody>
+            <tr><td>Self-attention</td><td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>O</mi><mo stretchy="false">&#x00028;</mo><msup><mi>T</mi><mrow><mn>2</mn></mrow></msup><mi>d</mi><mo stretchy="false">&#x00029;</mo></mrow></math></td><td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>O</mi><mo stretchy="false">&#x00028;</mo><mn>1</mn><mo stretchy="false">&#x00029;</mo></mrow></math></td><td><b>1</b></td></tr>
+            <tr><td>Recurrent</td><td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>O</mi><mo stretchy="false">&#x00028;</mo><mi>T</mi><msup><mi>d</mi><mrow><mn>2</mn></mrow></msup><mo stretchy="false">&#x00029;</mo></mrow></math></td><td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>O</mi><mo stretchy="false">&#x00028;</mo><mi>T</mi><mo stretchy="false">&#x00029;</mo></mrow></math></td><td><b>11</b></td></tr>
+          </tbody>
+        </table>
+        <div class="mnote">With <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>T</mi><mo>&#x0003D;</mo><mn>12</mn></mrow></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>d</mi><mo>&#x0003D;</mo><mn>256</mn></mrow></math>: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msup><mi>T</mi><mrow><mn>2</mn></mrow></msup><mi>d</mi><mo>&#x02248;</mo><mn>3.7</mn><mi>&#x000D7;</mi><msup><mn>10</mn><mrow><mn>4</mn></mrow></msup></mrow></math> vs <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>T</mi><msup><mi>d</mi><mrow><mn>2</mn></mrow></msup><mo>&#x02248;</mo><mn>7.9</mn><mi>&#x000D7;</mi><msup><mn>10</mn><mrow><mn>5</mn></mrow></msup></mrow></math>; constants omitted (Vaswani et al., 2017, Table 1).</div></div>
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-layers"/></svg>Parameters per encoder layer</div>
+        <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo stretchy="false">&#x0007C;</mo><msub><mi>&#x003D5;</mi><mrow><mi>&#x02113;</mi></mrow></msub><mo stretchy="false">&#x0007C;</mo><mo>&#x0003D;</mo><munder><munder><mrow><mn>4</mn><msup><mi>d</mi><mrow><mn>2</mn></mrow></msup><mo>&#x0002B;</mo><mn>4</mn><mi>d</mi></mrow><mo>&#x23DF;</mo></munder><mrow><mtext>attention</mtext></mrow></munder><mo>&#x0002B;</mo><munder><munder><mrow><mn>2</mn><mi>d</mi><mspace width="0.167em" /><msub><mi>d</mi><mrow><mi>f</mi><mi>f</mi></mrow></msub><mo>&#x0002B;</mo><msub><mi>d</mi><mrow><mi>f</mi><mi>f</mi></mrow></msub><mo>&#x0002B;</mo><mi>d</mi></mrow><mo>&#x23DF;</mo></munder><mrow><mtext>feed-forward</mtext></mrow></munder><mo>&#x0002B;</mo><munder><munder><mrow><mn>4</mn><mi>d</mi></mrow><mo>&#x23DF;</mo></munder><mrow><mtext>2&#x000A0;LayerNorms</mtext></mrow></munder><mo>&#x0003D;</mo><mtext>527,104</mtext></mrow></math>
+        <div class="mnote"><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>d</mi><mo>&#x0003D;</mo><mn>256</mn></mrow></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>d</mi><mrow><mi>f</mi><mi>f</mi></mrow></msub><mo>&#x0003D;</mo><mn>512</mn></mrow></math>; whole T3C: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mtext>4,608</mtext><mo>&#x0002B;</mo><mtext>3,072</mtext><mo>&#x0002B;</mo><mn>512</mn><mo>&#x0002B;</mo><mn>6</mn><mi>&#x000B7;</mi><mtext>527,104</mtext><mo>&#x0002B;</mo><mn>771</mn><mo>&#x02248;</mo><mn>3.17</mn><mtext>&#x000A0;</mtext><mi>&#x0004D;</mi></mrow></math></div></div>
+    </div>
+  </div>
+  <div class="src">Equations follow the architecture in the manuscript (Section 2.3.5). Parameter counts are computed from the layer sizes, not read from a checkpoint.</div>
+  <aside class="notes">Here is the encoder in equations, using the row-vector convention. Equation one: the 17 features are projected to 256 dimensions, the learned positional embedding is added, and LayerNorm is applied. Equations two and three: each of the eight heads forms queries, keys and values of 32 dimensions and a 12-by-12 attention matrix with the scaled softmax. Equation four concatenates the heads and projects them back with W-O. Equations five and six are the two post-norm sub-layers: attention, then a ReLU feed-forward network that widens to 512, each with dropout, a residual connection and LayerNorm. Equation seven is last-token pooling and the classifier. On the right: per layer, self-attention costs on the order of T-squared times d operations with constant sequential depth, and the path from step one to step twelve is a single hop; a recurrent layer needs T sequential steps and an 11-step path. With only 12 steps and a width of 256, the attention term is small. The parameter formula gives 527,104 per layer, and about 3.17 million for the whole model.</aside>
+</section>
+
+
 <!-- =====================================================================
      20. BiLSTM + TRAINING (creative)
      ===================================================================== -->
@@ -1285,6 +1381,61 @@ ul.iconlist li div b { color: var(--ink); font-family: var(--font); font-weight:
     </div>
   </div>
   <aside class="notes">As a baseline we used a two-layer bidirectional LSTM. The animation shows how it reads the 12 steps: the forward direction from the first to the last step, the backward direction from the last to the first, concatenated to 512 at each step; the last step goes to the classifier. Recurrent networks are widely used for comfort prediction, so the baseline tells us whether the transfer result depends on the Transformer. On the right is the shared training recipe: class-weighted cross-entropy with these weights, Adam at 1e-4 with the learning rate halved on a plateau, 55 epochs, batch 64, small input noise with sigma 0.005 and gradient clipping, and three seeds. We report accuracy and macro-F1.</aside>
+</section>
+
+<!--MATH:BILSTM-->
+<section class="slide" data-section="Methods" data-title="The BiLSTM, formally">
+  <h2 class="title">The BiLSTM, formally, and how each model sees the past</h2>
+  <div class="cols" style="grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:22px">
+    <div class="mcard eqs lstm">
+      <div class="mh"><svg class="ic"><use href="#i-wave"/></svg>LSTM cell (column-vector convention)</div>
+      <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>i</mi><mi>t</mi></msub><mo>&#x0003D;</mo><mi>&#x003C3;</mi><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msub><mi>W</mi><mi>i</mi></msub><msub><mi>x</mi><mi>t</mi></msub><mo>&#x0002B;</mo><msub><mi>U</mi><mi>i</mi></msub><msub><mi>h</mi><mrow><mi>t</mi><mo>&#x02212;</mo><mn>1</mn></mrow></msub><mo>&#x0002B;</mo><msub><mi>b</mi><mi>i</mi></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mo>&#x0002C;</mo><mspace width="1em" /><msub><mi>f</mi><mi>t</mi></msub><mo>&#x0003D;</mo><mi>&#x003C3;</mi><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msub><mi>W</mi><mi>f</mi></msub><msub><mi>x</mi><mi>t</mi></msub><mo>&#x0002B;</mo><msub><mi>U</mi><mi>f</mi></msub><msub><mi>h</mi><mrow><mi>t</mi><mo>&#x02212;</mo><mn>1</mn></mrow></msub><mo>&#x0002B;</mo><msub><mi>b</mi><mi>f</mi></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow></mrow></math><span class="eqn">(8)</span></div>
+      <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>o</mi><mi>t</mi></msub><mo>&#x0003D;</mo><mi>&#x003C3;</mi><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msub><mi>W</mi><mi>o</mi></msub><msub><mi>x</mi><mi>t</mi></msub><mo>&#x0002B;</mo><msub><mi>U</mi><mi>o</mi></msub><msub><mi>h</mi><mrow><mi>t</mi><mo>&#x02212;</mo><mn>1</mn></mrow></msub><mo>&#x0002B;</mo><msub><mi>b</mi><mi>o</mi></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mo>&#x0002C;</mo><mspace width="1em" /><msub><mi>g</mi><mi>t</mi></msub><mo>&#x0003D;</mo><mi>tanh</mi><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msub><mi>W</mi><mi>g</mi></msub><msub><mi>x</mi><mi>t</mi></msub><mo>&#x0002B;</mo><msub><mi>U</mi><mi>g</mi></msub><msub><mi>h</mi><mrow><mi>t</mi><mo>&#x02212;</mo><mn>1</mn></mrow></msub><mo>&#x0002B;</mo><msub><mi>b</mi><mi>g</mi></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow></mrow></math><span class="eqn">(9)</span></div>
+      <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>c</mi><mi>t</mi></msub><mo>&#x0003D;</mo><msub><mi>f</mi><mi>t</mi></msub><mo>&#x02299;</mo><msub><mi>c</mi><mrow><mi>t</mi><mo>&#x02212;</mo><mn>1</mn></mrow></msub><mo>&#x0002B;</mo><msub><mi>i</mi><mi>t</mi></msub><mo>&#x02299;</mo><msub><mi>g</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mspace width="2em" /><msub><mi>h</mi><mi>t</mi></msub><mo>&#x0003D;</mo><msub><mi>o</mi><mi>t</mi></msub><mo>&#x02299;</mo><mi>tanh</mi><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msub><mi>c</mi><mi>t</mi></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow></mrow></math><span class="eqn">(10)</span></div>
+      <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>h</mi><mi>t</mi></msub><mo>&#x0003D;</mo><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><msub><mover><mrow><mi>h</mi></mrow><mo>&#x02192;</mo></mover><mi>t</mi></msub><mspace width="0.167em" /><mi>;</mi><mspace width="0.167em" /><msub><mover><mrow><mi>h</mi></mrow><mo>&#x02190;</mo></mover><mi>t</mi></msub><mo stretchy="true" fence="true" form="postfix">]</mo></mrow><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>512</mn></mrow></msup><mo>&#x0002C;</mo><mspace width="2em" /><mover><mrow><mi>y</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mo>&#x0003D;</mo><mo>softmax</mo><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msub><mi>W</mi><mi>c</mi></msub><mspace width="0.167em" /><mrow><mi mathvariant="normal">D</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">p</mi></mrow><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msubsup><mi>h</mi><mrow><mn>12</mn></mrow><mrow><mo stretchy="false">&#x00028;</mo><mn>2</mn><mo stretchy="false">&#x00029;</mo></mrow></msubsup><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mo>&#x0002B;</mo><msub><mi>b</mi><mi>c</mi></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow></mrow></math><span class="eqn">(11)</span></div>
+      <div class="mnote">Two stacked bidirectional layers, 256 units per direction; parameters per direction <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>4</mn><mspace width="0.167em" /><msub><mi>d</mi><mi>h</mi></msub><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msub><mi>d</mi><mrow><mi>i</mi><mi>n</mi></mrow></msub><mo>&#x0002B;</mo><msub><mi>d</mi><mi>h</mi></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mo>&#x0002B;</mo><mn>8</mn><mspace width="0.167em" /><msub><mi>d</mi><mi>h</mi></msub></mrow></math> (PyTorch convention, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>d</mi><mi>h</mi></msub><mo>&#x0003D;</mo><mn>256</mn></mrow></math>).</div>
+    </div>
+    <div class="mcol">
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-net"/></svg>Attention: one hop, explicit weights</div>
+        <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>z</mi><mrow><mn>12</mn></mrow></msub><mo>&#x0003D;</mo><msubsup><mo>&#x02211;</mo><mrow><mi>j</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><mn>12</mn></mrow></msubsup><msub><mi>A</mi><mrow><mn>12</mn><mo>&#x0002C;</mo><mi>j</mi></mrow></msub><mspace width="0.167em" /><msub><mi>v</mi><mi>j</mi></msub><mo>&#x0002C;</mo><mspace width="2em" /><msubsup><mo>&#x02211;</mo><mrow><mi>j</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><mn>12</mn></mrow></msubsup><msub><mi>A</mi><mrow><mn>12</mn><mo>&#x0002C;</mo><mi>j</mi></mrow></msub><mo>&#x0003D;</mo><mn>1</mn></mrow></math>
+        <div class="mnote">Every step reaches step 12 directly, with a learned weight per head.</div></div>
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-wave"/></svg>Recurrence: unrolled cell state (exact)</div>
+        <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>c</mi><mrow><mn>12</mn></mrow></msub><mo>&#x0003D;</mo><mo minsize="1.623em" maxsize="1.623em">(</mo><msubsup><mo>&#x0220F;</mo><mrow><mi>t</mi><mo>&#x0003D;</mo><mn>2</mn></mrow><mrow><mn>12</mn></mrow></msubsup><msub><mi>f</mi><mi>t</mi></msub><mo minsize="1.623em" maxsize="1.623em">)</mo><mo>&#x02299;</mo><msub><mi>c</mi><mn>1</mn></msub><mo>&#x0002B;</mo><msubsup><mo>&#x02211;</mo><mrow><mi>k</mi><mo>&#x0003D;</mo><mn>2</mn></mrow><mrow><mn>12</mn></mrow></msubsup><mo minsize="1.623em" maxsize="1.623em">(</mo><msubsup><mo>&#x0220F;</mo><mrow><mi>t</mi><mo>&#x0003D;</mo><mi>k</mi><mo>&#x0002B;</mo><mn>1</mn></mrow><mrow><mn>12</mn></mrow></msubsup><msub><mi>f</mi><mi>t</mi></msub><mo minsize="1.623em" maxsize="1.623em">)</mo><mo>&#x02299;</mo><msub><mi>i</mi><mi>k</mi></msub><mo>&#x02299;</mo><msub><mi>g</mi><mi>k</mi></msub></mrow></math>
+        <div class="mnote">Step <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>k</mi></mrow></math> reaches step 12 through <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>12</mn><mo>&#x02212;</mo><mi>k</mi></mrow></math> forget gates, each <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>f</mi><mi>t</mi></msub><mo>&#x02208;</mo><mo stretchy="false">&#x00028;</mo><mn>0</mn><mo>&#x0002C;</mo><mn>1</mn><mo stretchy="false">&#x00029;</mo></mrow></math> elementwise.</div></div>
+      <div class="callout" style="margin-top:2px"><svg class="ic ic-c"><use href="#i-search"/></svg><div>A <b>structural</b> difference between the backbones, not a controlled test of why their adapters behaved differently.</div></div>
+    </div>
+  </div>
+  <div class="src">LSTM after Hochreiter &amp; Schmidhuber (1997); bidirectional reading after Schuster &amp; Paliwal (1997); configuration as in the manuscript (Section 2.3.6).</div>
+  <aside class="notes">For the baseline, these are the standard LSTM equations: input, forget and output gates and a candidate g, a cell state that is a gated sum of the previous cell state and the candidate, and a hidden state. The bidirectional layer concatenates a forward and a backward pass into 512 dimensions, and the classifier reads the second layer at step twelve. On the right is the structural contrast. With attention, step twelve is a weighted sum over all twelve value vectors, one hop, with explicit weights that sum to one. If I unroll the cell-state recursion exactly, step k reaches step twelve through a product of twelve minus k forget gates, each between zero and one. This is a structural difference between the backbones; I do not claim it is the tested reason for the adaptation gap.</aside>
+</section>
+
+
+<!--MATH:OPTIM-->
+<section class="slide" data-section="Methods" data-title="Optimization and evaluation, formally">
+  <h2 class="title">Optimization and evaluation, formally</h2>
+  <div class="cols c2" style="gap:24px">
+    <div class="mcol">
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-scale"/></svg>Class-weighted cross-entropy</div>
+        <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>&#x02112;</mi><mrow><mi>w</mi></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo>&#x02212;</mo><mfrac><mrow><msub><mo>&#x02211;</mo><mrow><mi>i</mi></mrow></msub><msub><mi>w</mi><mrow><msub><mi>y</mi><mi>i</mi></msub></mrow></msub><mi>log</mi><msub><mi>p</mi><mrow><mi>&#x003B8;</mi></mrow></msub><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msub><mi>y</mi><mi>i</mi></msub><mo>&#x02223;</mo><msub><mi>X</mi><mi>i</mi></msub><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow></mrow><mrow><msub><mo>&#x02211;</mo><mrow><mi>i</mi></mrow></msub><msub><mi>w</mi><mrow><msub><mi>y</mi><mi>i</mi></msub></mrow></msub></mrow></mfrac><mo>&#x0002C;</mo><mspace width="2em" /><msub><mi>w</mi><mi>c</mi></msub><mo>&#x0003D;</mo><mfrac><mrow><mi>N</mi></mrow><mrow><mi>K</mi><mspace width="0.167em" /><msub><mi>N</mi><mi>c</mi></msub></mrow></mfrac></mrow></math><span class="eqn">(12)</span></div>
+        <div class="mnote"><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>w</mi><mo>&#x0003D;</mo><mo stretchy="false">&#x00028;</mo><mn>0.78</mn><mo>&#x0002C;</mo><mtext>&#x000A0;</mtext><mn>1.06</mn><mo>&#x0002C;</mo><mtext>&#x000A0;</mtext><mn>1.28</mn><mo stretchy="false">&#x00029;</mo></mrow></math> for (Neutral, Warm, Cool) on ASHRAE DB II</div></div>
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-chart"/></svg>Adam with a plateau schedule</div>
+        <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>m</mi><mi>t</mi></msub><mo>&#x0003D;</mo><msub><mi>&#x003B2;</mi><mn>1</mn></msub><msub><mi>m</mi><mrow><mi>t</mi><mo>&#x02212;</mo><mn>1</mn></mrow></msub><mo>&#x0002B;</mo><mo stretchy="false">&#x00028;</mo><mn>1</mn><mo>&#x02212;</mo><msub><mi>&#x003B2;</mi><mn>1</mn></msub><mo stretchy="false">&#x00029;</mo><mspace width="0.167em" /><msub><mi>g</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mspace width="2em" /><msub><mi>v</mi><mi>t</mi></msub><mo>&#x0003D;</mo><msub><mi>&#x003B2;</mi><mn>2</mn></msub><msub><mi>v</mi><mrow><mi>t</mi><mo>&#x02212;</mo><mn>1</mn></mrow></msub><mo>&#x0002B;</mo><mo stretchy="false">&#x00028;</mo><mn>1</mn><mo>&#x02212;</mo><msub><mi>&#x003B2;</mi><mn>2</mn></msub><mo stretchy="false">&#x00029;</mo><mspace width="0.167em" /><msubsup><mi>g</mi><mi>t</mi><mrow><mn>2</mn></mrow></msubsup></mrow></math><span class="eqn">(13)</span></div>
+        <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>&#x003B8;</mi><mi>t</mi></msub><mo>&#x0003D;</mo><msub><mi>&#x003B8;</mi><mrow><mi>t</mi><mo>&#x02212;</mo><mn>1</mn></mrow></msub><mo>&#x02212;</mo><msub><mi>&#x003B7;</mi><mi>t</mi></msub><mspace width="0.167em" /><mfrac><mrow><msub><mover><mrow><mi>m</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub></mrow><mrow><msqrt><mrow><msub><mover><mrow><mi>v</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub></mrow></msqrt><mo>&#x0002B;</mo><mi>&#x003F5;</mi></mrow></mfrac><mo>&#x0002C;</mo><mspace width="2em" /><msub><mi>&#x003B7;</mi><mn>0</mn></msub><mo>&#x0003D;</mo><msup><mn>10</mn><mrow><mo>&#x02212;</mo><mn>4</mn></mrow></msup></mrow></math><span class="eqn">(14)</span></div><div class="mnote">Plateau schedule: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003B7;</mi><mo>&#x02190;</mo><mi>&#x003B7;</mi><mo>&#x0002F;</mo><mn>2</mn></mrow></math> after 3 epochs without validation-loss improvement</div></div>
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-wave"/></svg>Regularization</div>
+        <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover><mrow><mi>X</mi></mrow><mo stretchy="false">&#x0007E;</mo></mover><mo>&#x0003D;</mo><mi>X</mi><mo>&#x0002B;</mo><mi>&#x003B5;</mi><mo>&#x0002C;</mo><mtext>&#x000A0;</mtext><mtext>&#x000A0;</mtext><mi>&#x003B5;</mi><mi>&#x0007E;</mi><mi>&#x1D4A9;</mi><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mn>0</mn><mo>&#x0002C;</mo><msup><mi>&#x003C3;</mi><mrow><mn>2</mn></mrow></msup><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mo>&#x0002C;</mo><mtext>&#x000A0;</mtext><mi>&#x003C3;</mi><mo>&#x0003D;</mo><mn>0.005</mn><mo>&#x0002C;</mo><mspace width="2em" /><mi>g</mi><mo>&#x02190;</mo><mi>g</mi><mi>&#x000B7;</mi><mo>min</mo><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mn>1</mn><mo>&#x0002C;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mo>&#x02016;</mo><mi>g</mi><msub><mo>&#x02016;</mo><mn>2</mn></msub></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow></mrow></math><span class="eqn">(15)</span></div></div>
+    </div>
+    <div class="mcol">
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-target"/></svg>Per-class and overall metrics</div>
+        <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>P</mi><mi>c</mi></msub><mo>&#x0003D;</mo><mfrac><mrow><mi>T</mi><msub><mi>P</mi><mi>c</mi></msub></mrow><mrow><mi>T</mi><msub><mi>P</mi><mi>c</mi></msub><mo>&#x0002B;</mo><mi>F</mi><msub><mi>P</mi><mi>c</mi></msub></mrow></mfrac><mo>&#x0002C;</mo><mspace width="2em" /><msub><mi>R</mi><mi>c</mi></msub><mo>&#x0003D;</mo><mfrac><mrow><mi>T</mi><msub><mi>P</mi><mi>c</mi></msub></mrow><mrow><mi>T</mi><msub><mi>P</mi><mi>c</mi></msub><mo>&#x0002B;</mo><mi>F</mi><msub><mi>N</mi><mi>c</mi></msub></mrow></mfrac><mo>&#x0002C;</mo><mspace width="2em" /><mi>F</mi><msub><mn>1</mn><mi>c</mi></msub><mo>&#x0003D;</mo><mfrac><mrow><mn>2</mn><msub><mi>P</mi><mi>c</mi></msub><msub><mi>R</mi><mi>c</mi></msub></mrow><mrow><msub><mi>P</mi><mi>c</mi></msub><mo>&#x0002B;</mo><msub><mi>R</mi><mi>c</mi></msub></mrow></mfrac></mrow></math><span class="eqn">(16)</span></div>
+        <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mrow><mi mathvariant="normal">A</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">c</mi></mrow><mo>&#x0003D;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>N</mi></mrow></mfrac><msubsup><mo>&#x02211;</mo><mrow><mi>i</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></msubsup><mrow><mn mathvariant="bold">1</mn></mrow><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><msub><mover><mrow><mi>y</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>i</mi></msub><mo>&#x0003D;</mo><msub><mi>y</mi><mi>i</mi></msub><mo stretchy="true" fence="true" form="postfix">]</mo></mrow><mo>&#x0002C;</mo><mspace width="2em" /><mtext>Macro-F1</mtext><mo>&#x0003D;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>K</mi></mrow></mfrac><msubsup><mo>&#x02211;</mo><mrow><mi>c</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><mi>K</mi></mrow></msubsup><mi>F</mi><msub><mn>1</mn><mi>c</mi></msub></mrow></math><span class="eqn">(17)</span></div>
+        <div class="mnote">Macro-F1 weights each class equally, so the rare warm class counts as much as the others.</div></div>
+      <div class="mcard"><div class="mh"><svg class="ic"><use href="#i-dice"/></svg>Repeated runs and reference points</div>
+        <div class="eqr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover><mrow><mi>a</mi></mrow><mo stretchy="true">&#x000AF;</mo></mover><mo>&#x0003D;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac><msubsup><mo>&#x02211;</mo><mrow><mi>r</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><mn>3</mn></mrow></msubsup><msub><mi>a</mi><mi>r</mi></msub><mo>&#x0002C;</mo><mspace width="2em" /><mi>s</mi><mo>&#x0003D;</mo><msqrt><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac><msubsup><mo>&#x02211;</mo><mrow><mi>r</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><mn>3</mn></mrow></msubsup><msup><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msub><mi>a</mi><mi>r</mi></msub><mo>&#x02212;</mo><mover><mrow><mi>a</mi></mrow><mo stretchy="true">&#x000AF;</mo></mover><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mrow><mn>2</mn></mrow></msup></mrow></msqrt></mrow></math><span class="eqn">(18)</span></div>
+        <div class="mnote">Adapter: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mover><mrow><mi>a</mi></mrow><mo stretchy="true">&#x000AF;</mo></mover><mo>&#x0003D;</mo><mn>73.33</mn><mi>&#x00025;</mi></mrow></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>s</mi><mo>&#x0003D;</mo><mn>1.36</mn></mrow></math> pp. Majority-class reference <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mo>max</mo><mi>c</mi></msub><msub><mi>N</mi><mi>c</mi></msub><mo>&#x0002F;</mo><mi>N</mi></mrow></math>: 42.5% (ASHRAE), 50% (local validation).</div></div>
+    </div>
+  </div>
+  <div class="src">Settings from the manuscript (Sections 2.3.5–2.3.7): Adam (Kingma &amp; Ba, 2015), learning rate 1 × 10⁻⁴, halved on a 3-epoch plateau, 55 epochs, batch 64, input noise σ = 0.005, clipping at norm 1.0 (BiLSTM per manuscript; also in the T3C code). The reported SDs match the population SD in (18).</div>
+  <aside class="notes">Finally the training and evaluation, formally. Equation twelve is the class-weighted cross-entropy, with weights inversely proportional to class frequency, which gives 0.78, 1.06 and 1.28 on ASHRAE. Equations thirteen and fourteen are the Adam update with the plateau schedule: the learning rate starts at one times ten to the minus four and halves after three epochs without improvement. Equation fifteen is the input noise and gradient-norm clipping. On the right are the metric definitions: per-class precision, recall and F1, accuracy, and macro-F1, which weights the rare warm class as much as the others. Results are means over three seeds with the population standard deviation, which matches the reported values, for example 73.33 percent plus or minus 1.36 for the Transformer adapter. The majority-class reference is 50 percent on the local validation data.</aside>
 </section>
 
 <!-- =====================================================================
@@ -2905,6 +3056,124 @@ button{font:inherit;font-size:16px;padding:8px 16px;border-radius:8px;border:1px
 })();
 
 /* ==========================================================================
+   Title-slide graphic: the Transformer adapter drawn bottom-to-top (input
+   steps with cycling self-attention arcs → adapter → + positional embedding
+   → ×6 encoder → pooling → classifier → class probabilities). Illustrative.
+   ========================================================================== */
+(function () {
+  "use strict";
+  const root = document.getElementById("hero-tf"); if (!root) return;
+  const slide = root.closest(".slide");
+  const NS = "http://www.w3.org/2000/svg";
+  function s(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) { if (k === "text") e.textContent = attrs[k]; else if (k === "style") e.setAttribute("style", attrs[k]); else e.setAttribute(k, attrs[k]); }
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  const W = 704, H = 900, cx = 352, T = 12;
+  let svg, arcG, tokens = [], q = 11, timer = null;
+  const tokX = i => 96 + i * ((W - 192) / (T - 1)), tokY = 770;
+
+  function block(y, h, label, sub, kind, x0, x1) {
+    x0 = x0 || 196; x1 = x1 || 508;
+    const fill = kind === "accent" ? "var(--accent-soft)" : kind === "train" ? "var(--trainable-soft)" : kind === "gray" ? "var(--card-2)" : "var(--card)";
+    const stroke = kind === "train" ? "var(--trainable)" : kind === "accent" ? "color-mix(in srgb, var(--accent) 45%, transparent)" : "var(--border-2)";
+    s("rect", { x: x0, y, width: x1 - x0, height: h, rx: 10, style: `fill:${fill};stroke:${stroke};stroke-width:${kind === "train" ? 2 : 1.4}` }, svg);
+    s("text", { x: (x0 + x1) / 2, y: y + (sub ? h / 2 - 3 : h / 2 + 6), "text-anchor": "middle", style: "fill:var(--ink);font:650 16.5px var(--font)", text: label }, svg);
+    if (sub) s("text", { x: (x0 + x1) / 2, y: y + h / 2 + 15, "text-anchor": "middle", style: "fill:var(--ink-2);font:13px var(--serif)", text: sub }, svg);
+  }
+  function arrow(y1, y2, x) { s("line", { x1: x || cx, x2: x || cx, y1, y2: y2 + 6, style: "stroke:var(--axis);stroke-width:2", "marker-end": "url(#tf-arw)" }, svg); }
+
+  function build() {
+    root.innerHTML = "";
+    svg = s("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", height: "100%", preserveAspectRatio: "xMidYMid meet" }, root);
+    const defs = s("defs", {}, svg);
+    const mk = s("marker", { id: "tf-arw", viewBox: "0 0 10 10", refX: 8, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto" }, defs);
+    s("path", { d: "M0,0 L10,5 L0,10 z", style: "fill:var(--axis)" }, mk);
+    s("text", { x: 40, y: 44, style: "fill:var(--accent-ink);font:700 13px var(--font);letter-spacing:.14em", text: "THE MODEL · TRANSFORMER + ADAPTER" }, svg);
+
+    // output probabilities (top)
+    const probs = [["Uncomfortably Cool", 0.09, "var(--cool)"], ["Neutral", 0.33, "var(--neutral)"], ["Uncomfortably Warm", 0.58, "var(--warm)"]];
+    probs.forEach(([n, p, c], i) => {
+      const y = 70 + i * 30;
+      s("text", { x: 228, y: y + 14, "text-anchor": "end", style: "fill:var(--ink-2);font:14px var(--font)", text: n }, svg);
+      s("rect", { x: 240, y, width: 240, height: 18, rx: 5, style: "fill:var(--grid)" }, svg);
+      s("rect", { x: 240, y, width: Math.max(6, 240 * p), height: 18, rx: 5, class: "anim-barx", style: `fill:${c};--dl:${0.2 + i * 0.12}s` }, svg);
+      s("text", { x: 248 + Math.max(6, 240 * p), y: y + 14, style: "fill:var(--ink);font:650 14px var(--font)", text: p.toFixed(2) }, svg);
+    });
+    arrow(186, 166);
+    block(186, 34, "Linear 256 → 3 · softmax", null, "card");
+    arrow(258, 226);
+    block(232, 34, "Last-token pooling (step 12)", null, "card");
+
+    // encoder group ×6
+    s("rect", { x: 160, y: 286, width: 384, height: 304, rx: 18, style: "fill:none;stroke:var(--frozen);stroke-width:2;stroke-dasharray:7 6" }, svg);
+    s("text", { x: 556, y: 430, style: "fill:var(--accent-ink);font:750 30px var(--font)", text: "× 6" }, svg);
+    s("text", { x: 556, y: 452, style: "fill:var(--muted);font:13px var(--serif)", text: "5 frozen" }, svg);
+    s("text", { x: 556, y: 468, style: "fill:var(--muted);font:13px var(--serif)", text: "1 fine-tuned" }, svg);
+    block(300, 30, "Add & Norm", null, "gray");
+    arrow(352, 336);
+    block(352, 46, "Feed-forward", "256 → 512 → 256 · ReLU", "accent");
+    arrow(420, 404);
+    block(420, 30, "Add & Norm", null, "gray");
+    arrow(472, 456);
+    s("rect", { x: 196, y: 472, width: 312, height: 72, rx: 10, style: "fill:var(--accent-soft);stroke:color-mix(in srgb, var(--accent) 45%, transparent);stroke-width:1.4" }, svg);
+    s("text", { x: cx, y: 496, "text-anchor": "middle", style: "fill:var(--ink);font:650 16.5px var(--font)", text: "Multi-head self-attention · 8 heads" }, svg);
+    for (let hd = 0; hd < 8; hd++) s("rect", { x: 236 + hd * 30, y: 510, width: 24, height: 22, rx: 4, class: "tf-head", style: `fill:var(--t3c);opacity:${0.35 + 0.08 * hd};--dl:${hd * 0.15}s` }, svg);
+    // residual paths
+    s("path", { d: "M196,566 C150,566 150,436 196,436", style: "fill:none;stroke:var(--axis);stroke-width:1.8", "marker-end": "url(#tf-arw)" }, svg);
+    s("path", { d: "M196,414 C150,414 150,316 196,316", style: "fill:none;stroke:var(--axis);stroke-width:1.8", "marker-end": "url(#tf-arw)" }, svg);
+    s("text", { x: 120, y: 504, "text-anchor": "middle", style: "fill:var(--muted);font:12px var(--serif)", text: "residual" }, svg);
+
+    arrow(616, 596);
+    // positional embedding
+    s("circle", { cx, cy: 634, r: 17, style: "fill:var(--card);stroke:var(--accent);stroke-width:2" }, svg);
+    s("path", { d: `M${cx - 9},634 L${cx + 9},634 M${cx},625 L${cx},643`, style: "stroke:var(--accent-ink);stroke-width:2.4;stroke-linecap:round" }, svg);
+    s("path", { d: "M396,634 q8,-12 16,0 t16,0 t16,0", style: "fill:none;stroke:var(--accent);stroke-width:2" }, svg);
+    s("text", { x: 452, y: 639, style: "fill:var(--ink-2);font:14px var(--font)", text: "positional embedding" }, svg);
+    arrow(670, 652);
+    block(670, 44, "Adapter", "6 → 128 → 256 · trained on local data", "train");
+    // input steps + fan-in
+    for (let i = 0; i < T; i++) s("line", { x1: tokX(i), y1: tokY - 15, x2: cx + (i - 5.5) * 12, y2: 716, style: "stroke:var(--grid);stroke-width:1.3" }, svg);
+    arcG = s("g", {}, svg);
+    tokens = [];
+    for (let i = 0; i < T; i++) {
+      const c = s("circle", { cx: tokX(i), cy: tokY, r: 14, style: `fill:var(--t3c);opacity:${0.35 + 0.65 * i / (T - 1)};stroke:var(--slide);stroke-width:2.5` }, svg);
+      tokens.push(c);
+    }
+    s("text", { x: tokX(0), y: tokY - 24, "text-anchor": "middle", style: "fill:var(--ink-2);font:13px var(--font)", text: "t − 11" }, svg);
+    s("text", { x: tokX(T - 1), y: tokY - 24, "text-anchor": "middle", style: "fill:var(--ink-2);font:13px var(--font)", text: "t (survey)" }, svg);
+    s("text", { x: cx, y: 876, "text-anchor": "middle", style: "fill:var(--muted);font:13.5px var(--serif)", text: "12 five-minute steps · air temperature, RH, heart rate + date features · illustrative" }, svg);
+    // flow pulse up the spine
+    s("circle", { cx, cy: 700, r: 6, class: "tf-pulse", style: "fill:var(--gold)" }, svg);
+    drawArcs();
+  }
+  function weights(qi) {
+    const lg = []; for (let j = 0; j < T; j++) lg.push(-Math.abs(qi - j) * 0.5 + (j === T - 1 ? 1.2 : 0) + (j === 0 ? 0.4 : 0));
+    const m = Math.max(...lg), e = lg.map(x => Math.exp(x - m)), sm = e.reduce((a, b) => a + b, 0); return e.map(x => x / sm);
+  }
+  function drawArcs() {
+    if (!arcG) return;
+    arcG.innerHTML = "";
+    const w = weights(q);
+    tokens.forEach((t, i) => { t.style.stroke = i === q ? "var(--gold)" : "var(--slide)"; t.style.strokeWidth = i === q ? 4 : 2.5; });
+    w.forEach((a, j) => {
+      if (j === q) return;
+      const x1 = tokX(q), x2 = tokX(j), dip = 18 + Math.abs(q - j) * 6.2;
+      s("path", { d: `M${x1},${tokY + 14} Q${(x1 + x2) / 2},${tokY + 14 + dip * 1.4} ${x2},${tokY + 14}`, class: "tf-arc",
+        style: `fill:none;stroke:var(--t3c);stroke-width:${(1 + a * 26).toFixed(2)};stroke-linecap:round;opacity:${(0.25 + a * 2.2).toFixed(2)}` }, arcG);
+    });
+  }
+  function start() { stop(); timer = setInterval(() => { q = (q + 1) % T; drawArcs(); }, 1500); }
+  function stop() { if (timer) clearInterval(timer); timer = null; }
+  Deck.on("ready", build);
+  Deck.on("theme", () => setTimeout(() => { build(); }, 0));
+  Deck.on("print", () => { q = 11; drawArcs(); });
+  Deck.registerStepper(slide, { enter() { q = 11; drawArcs(); start(); }, leave() { stop(); } });
+})();
+
+/* ==========================================================================
    WebGL 3D walkthrough of the Transformer adapter (bbycroft.net/llm style).
    Every tensor is a grid of lit cells; weights sit behind the activations
    they produce; a new tensor fills in time step by time step.
@@ -3931,87 +4200,6 @@ precision highp float; in float vA; out vec4 o; void main(){ vec2 q = gl_PointCo
   }
   function gauss(r) { let u = 0, v = 0; while (u === 0) u = r(); while (v === 0) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
   function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-
-  /* =====================================================================
-     1. Hero: three signals → model → comfort probabilities (illustrative)
-     ===================================================================== */
-  (function hero() {
-    const cv = document.getElementById("hero-canvas"); if (!cv) return;
-    const slide = cv.closest(".slide"), g = cv.getContext("2d");
-    let W = 700, H = 900, pr = 1, on = false, t0 = performance.now();
-    const sig = [
-      { name: "Air temperature", unit: "°C", f: t => 22.6 + 0.7 * Math.sin(t * 0.21) + 0.25 * Math.sin(t * 0.83) },
-      { name: "Relative humidity", unit: "%", f: t => 45 + 2.2 * Math.sin(t * 0.17 + 1) + 0.6 * Math.sin(t * 0.9) },
-      { name: "Heart rate", unit: "bpm", f: t => 78 + 5 * Math.sin(t * 0.25 + 2) + 2.2 * Math.sin(t * 1.7) + 1.2 * Math.sin(t * 3.1) }
-    ];
-    function size() { W = cv.parentElement.clientWidth; H = cv.parentElement.clientHeight; pr = (window.devicePixelRatio || 1) * Math.max(0.5, Deck.scale); cv.width = W * pr; cv.height = H * pr; }
-    function rr(x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
-    function draw(now) {
-      if (!on) return;
-      const t = (now - t0) / 1000;
-      const ink = css("--ink"), ink2 = css("--ink-2"), muted = css("--muted"), acc = css("--t3c"), grid = css("--grid"), card = css("--card");
-      g.setTransform(pr, 0, 0, pr, 0, 0); g.clearRect(0, 0, W, H);
-      const L = 56, R = W - 56, laneH = 118, top = 92;
-      g.font = "600 13px Segoe UI, system-ui, sans-serif"; g.fillStyle = muted;
-      g.fillText("AGGREGATED TO 5-MINUTE STEPS", L, 64);
-      sig.forEach((sg, i) => {
-        const y0 = top + i * laneH, h = 70;
-        g.strokeStyle = grid; g.lineWidth = 1; g.beginPath(); g.moveTo(L, y0 + h); g.lineTo(R - 120, y0 + h); g.stroke();
-        g.fillStyle = ink; g.font = "600 17px Segoe UI, system-ui, sans-serif"; g.fillText(sg.name, L, y0 - 6);
-        const vals = []; for (let k = 0; k <= 60; k++) vals.push(sg.f(t * 0.9 - (60 - k) * 0.12));
-        const mn = Math.min(...vals) - 0.5, mx = Math.max(...vals) + 0.5;
-        g.strokeStyle = acc; g.lineWidth = 2; g.lineJoin = "round"; g.beginPath();
-        vals.forEach((v, k) => { const x = L + (R - 120 - L) * k / 60, y = y0 + h - (v - mn) / (mx - mn) * h; k ? g.lineTo(x, y) : g.moveTo(x, y); });
-        g.stroke();
-        const v = vals[60], ex = R - 120, ey = y0 + h - (v - mn) / (mx - mn) * h;
-        g.fillStyle = acc; g.beginPath(); g.arc(ex, ey, 5, 0, 7); g.fill(); g.strokeStyle = css("--canvas-bg"); g.lineWidth = 2; g.stroke();
-        g.fillStyle = ink; g.font = "600 18px Segoe UI, system-ui, sans-serif"; g.fillText(v.toFixed(1), ex + 14, ey + 6);
-        g.fillStyle = muted; g.font = "13px Segoe UI, system-ui, sans-serif"; g.fillText(sg.unit, ex + 14, ey + 22);
-        // flow particles toward the model
-        for (let k = 0; k < 4; k++) {
-          const ph = ((t * 0.55 + k / 4 + i * 0.13) % 1);
-          const sx = ex, sy = ey, mxp = W / 2, myp = 520;
-          const px = sx + (mxp - sx) * ph, py = sy + (myp - sy) * ph * ph;
-          g.globalAlpha = Math.sin(Math.PI * ph) * 0.8; g.fillStyle = css("--gold");
-          g.beginPath(); g.arc(px, py, 3, 0, 7); g.fill(); g.globalAlpha = 1;
-        }
-      });
-      // model block with a 12 × 6 input grid lighting up
-      const bx = W / 2 - 150, by = 470, bw = 300, bh = 120;
-      g.fillStyle = card; g.strokeStyle = css("--border-2") || grid; g.lineWidth = 1.5; rr(bx, by, bw, bh, 16); g.fill(); g.stroke();
-      g.fillStyle = ink; g.font = "650 18px Segoe UI, system-ui, sans-serif"; g.fillText("T3C + adapter", bx + 18, by + 32);
-      g.fillStyle = muted; g.font = "13px Segoe UI, system-ui, sans-serif"; g.fillText("pretrained on ASHRAE DB II", bx + 18, by + 52);
-      for (let r = 0; r < 6; r++) for (let c = 0; c < 12; c++) {
-        const phase = (t * 2 - c * 0.18 - r * 0.05) % 3;
-        const a = Math.max(0.12, Math.exp(-Math.pow(phase - 0.5, 2) * 6));
-        g.globalAlpha = a; g.fillStyle = acc; g.fillRect(bx + 18 + c * 22, by + 66 + r * 8, 18, 5); g.globalAlpha = 1;
-      }
-      // outputs
-      const p = (() => {
-        const T = sig[0].f(t * 0.9), HR = sig[2].f(t * 0.9);
-        const lw = (T - 22.6) * 1.6 + (HR - 78) * 0.06, lc = -(T - 22.6) * 1.6 - 0.4, ln = 0.9;
-        const e = [Math.exp(lc), Math.exp(ln), Math.exp(lw)], sum = e[0] + e[1] + e[2];
-        return e.map(x => x / sum);
-      })();
-      const names = ["Uncomfortably Cool", "Neutral", "Uncomfortably Warm"], cols = [css("--cool"), css("--neutral"), css("--warm")];
-      g.fillStyle = muted; g.font = "600 13px Segoe UI, system-ui, sans-serif"; g.fillText("PREDICTED COMFORT", L, 650);
-      names.forEach((n, i) => {
-        const y = 672 + i * 52, bwMax = R - L - 200;
-        g.fillStyle = ink2; g.font = "16px Segoe UI, system-ui, sans-serif"; g.fillText(n, L, y + 17);
-        g.fillStyle = grid; rr(L + 190, y + 2, bwMax, 20, 5); g.fill();
-        g.fillStyle = cols[i]; rr(L + 190, y + 2, Math.max(8, bwMax * p[i]), 20, 5); g.fill();
-        g.fillStyle = ink; g.font = "600 16px Segoe UI, system-ui, sans-serif"; g.fillText(p[i].toFixed(2), L + 196 + Math.max(8, bwMax * p[i]), y + 18);
-      });
-      g.fillStyle = muted; g.font = "12.5px Segoe UI, system-ui, sans-serif"; g.fillText("Illustrative signals and outputs", L, H - 30);
-      requestAnimationFrame(draw);
-    }
-    Deck.registerStepper(slide, {
-      enter() { on = true; size(); requestAnimationFrame(draw); },
-      leave() { on = false; }
-    });
-    Deck.on("resize", () => { if (on) size(); });
-    Deck.on("print", () => { size(); on = true; draw(performance.now()); on = false; });
-  })();
 
   /* =====================================================================
      2. Pseudo-temporal sequentialization
